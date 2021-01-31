@@ -1,0 +1,82 @@
+<script src="lib/launchpad.js"></script>
+
+<script>
+  async function main() {
+    const midiAccess = await navigator.requestMIDIAccess()
+    const launchpad = autoDetectLaunchpad(midiAccess)
+    launchpad.clear()
+    const pacman = {
+      row: 1,
+      column: 1,
+      color: new Color(3, 3, false),
+      movement: {
+        row: 0,
+        column: 1
+      }
+    }
+    const pacColor = new Color(2, 0, false)
+    const pacs = []
+    for (let row = 1; row <= 8; row++) {
+      for (let column = 1; column <= 8; column++) {
+        if (!(row === 1 && column === 1)) {
+          const pac = {
+            row,
+            column,
+            color: pacColor
+          }
+          pacs.push(pac)
+        }
+      }
+    }
+
+    function renderPacman() {
+      launchpad.ledOn(new Pad(pacman.row, pacman.column), pacman.color)
+    }
+
+    for (const pac of pacs) {
+      launchpad.ledOn(new Pad(pac.row, pac.column), pac.color)
+    }
+
+    renderPacman()
+
+    const MAX_ROW = 8
+    const MAX_COLUMN = 8
+
+    setInterval(function () {
+      launchpad.ledOff(new Pad(pacman.row, pacman.column))
+      if (pacman.row + pacman.movement.row <= MAX_ROW) {
+        pacman.row += pacman.movement.row
+      }
+      if (pacman.column + pacman.movement.column <= MAX_COLUMN) {
+        pacman.column += pacman.movement.column
+      }
+      renderPacman()
+    }, 1000)
+
+    launchpad.onControlPadPress(function (column) {
+      if (column === 1) {
+        pacman.movement = {
+          row: -1,
+          column: 0
+        }
+      } else if (column === 2) {
+        pacman.movement = {
+          row: 1,
+          column: 0
+        }
+      } else if (column === 3) {
+        pacman.movement = {
+          row: 0,
+          column: -1
+        }
+      } else if (column === 4) {
+        pacman.movement = {
+          row: 0,
+          column: 1
+        }
+      }
+    })
+  }
+
+  main()
+</script>
